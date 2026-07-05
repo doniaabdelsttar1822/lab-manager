@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سجلات معمل الجودة</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap');
+:root {
+  --navy:#1b3a52; --teal:#2a8f80; --teal-light:#e6f4f2; --teal-mid:#c0deda;
+  --accent:#c97a3a; --border:#9fc4c0; --text:#1e2d35; --muted:#5e7b88;
+  --bg:#f0f5f5; --sw:270px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Cairo',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px;height:100vh;overflow:hidden;direction:rtl;}
+.app{display:flex;height:100vh;direction:ltr;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+.sb-header{padding:14px 12px 10px;border-bottom:1px solid rgba(255,255,255,0.1);}
+.sb-title{color:white;font-size:15px;font-weight:900;direction:rtl;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sb-count{background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);font-size:11px;padding:2px 8px;border-radius:10px;}
+.new-btn{width:100%;padding:9px;background:var(--teal);color:white;border:none;border-radius:6px;font-family:'Cairo',Arial,sans-serif;font-size:13px;font-weight:700;cursor:pointer;direction:rtl;transition:background .2s;}
+.new-btn:hover{background:#238a7a;}
+.sb-search{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:6px;}
+.s-inp{width:100%;padding:7px 10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:5px;color:white;font-family:'Cairo',Arial,sans-serif;font-size:12px;outline:none;direction:rtl;}
+.s-inp::placeholder{color:rgba(255,255,255,0.35);}
+.s-inp:focus{border-color:var(--teal);}
+.s-inp[type="date"]{direction:ltr;}
+.records-list{flex:1;overflow-y:auto;padding:6px 0;}
+.records-list::-webkit-scrollbar{width:3px;}
+.records-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:2px;}
+.rec-item{padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);transition:background .15s;direction:rtl;}
+.rec-item:hover{background:rgba(255,255,255,0.07);}
+.rec-item.active{background:var(--teal);}
+.rec-name{color:white;font-size:13px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rec-meta{color:rgba(255,255,255,0.5);font-size:10px;display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.rec-code{color:rgba(255,255,255,0.35);font-size:10px;margin-top:1px;}
+.badge{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap;}
+.bp{background:#2a8f80;color:white;} .bf{background:#c0392b;color:white;}
+.br{background:#c97a3a;color:white;} .bn{background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);}
+.empty{text-align:center;color:rgba(255,255,255,0.3);font-size:12px;padding:28px 16px;direction:rtl;line-height:1.7;}
+.empty .ico{font-size:28px;margin-bottom:8px;}
+
+/* MAIN */
+.main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;direction:rtl;}
+.toolbar{background:white;border-bottom:1px solid var(--border);padding:9px 18px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.save-status{font-size:12px;color:var(--muted);margin-left:auto;transition:color .3s;}
+.btn{display:flex;align-items:center;gap:5px;padding:7px 13px;border:none;border-radius:5px;font-family:'Cairo',Arial,sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+.bt{background:var(--teal);color:white;} .bt:hover{background:#238a7a;}
+.bn2{background:var(--navy);color:white;} .bn2:hover{background:#142d40;}
+.bo{background:white;color:var(--navy);border:1.5px solid var(--border);} .bo:hover{border-color:var(--navy);}
+.bd{background:white;color:#c0392b;border:1.5px solid #e0b0ae;} .bd:hover{background:#c0392b;color:white;}
+.form-area{flex:1;overflow-y:auto;padding:18px 22px;}
+.form-area::-webkit-scrollbar{width:5px;}
+.form-area::-webkit-scrollbar-thumb{background:var(--teal-mid);border-radius:3px;}
+.no-sel{display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:10px;color:var(--muted);direction:rtl;}
+.no-sel .ico{font-size:44px;}
+.no-sel h3{font-size:15px;color:var(--navy);}
+
+/* FORM */
+.f-header{background:var(--navy);color:white;padding:13px 18px;display:grid;grid-template-columns:54px 1fr 80px;align-items:center;gap:10px;border-radius:8px 8px 0 0;}
+.f-logo{width:48px;height:48px;background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.f-title h1{font-size:16px;font-weight:900;margin-bottom:2px;}
+.f-title .sub{font-size:10px;color:var(--teal-mid);}
+.f-docno{font-size:10px;color:var(--teal-mid);line-height:1.9;text-align:left;}
+.f-docno strong{color:white;font-size:12px;}
+.id-strip{background:var(--teal);padding:9px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.idf{display:flex;flex-direction:column;gap:3px;}
+.idf label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:.6px;}
+.iv{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:3px;padding:5px 8px;color:white;font-size:12px;font-weight:600;font-family:'Cairo',Arial,sans-serif;outline:none;width:100%;direction:rtl;}
+.iv[type="date"]{direction:ltr;}
+.f-body{background:white;border-radius:0 0 8px 8px;border:1px solid var(--border);border-top:none;}
+.f-secs{padding:15px 18px;display:flex;flex-direction:column;gap:15px;}
+.sec-title{font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+.sec-title::before{content:'';width:4px;height:13px;background:var(--teal);border-radius:2px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--teal-mid);}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--border);border-radius:6px;overflow:hidden;}
+.mc{padding:11px 13px;border-left:1px solid var(--border);border-bottom:1px solid var(--border);background:white;}
+.mc:nth-child(3n+1){border-left:none;}
+.mc:nth-last-child(-n+3){border-bottom:none;}
+.mh{display:flex;align-items:center;gap:6px;margin-bottom:7px;}
+.mi{width:24px;height:24px;background:var(--navy);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.mn{font-weight:700;font-size:12px;color:var(--navy);}
+.mu{font-size:10px;color:var(--muted);}
+.mr{display:flex;align-items:center;gap:5px;margin-bottom:4px;}
+.mr label{font-size:10px;color:var(--muted);min-width:46px;flex-shrink:0;font-weight:600;}
+.il{flex:1;border:none;border-bottom:1.5px solid var(--border);outline:none;padding:2px 4px;font-family:'Cairo',Arial,sans-serif;font-size:12px;color:var(--text);background:transparent;text-align:center;direction:ltr;}
+.il:focus{border-color:var(--teal);}
+.il.rtl-in{text-align:right;direction:rtl;}
+.ub{font-size:10px;color:var(--muted);background:var(--teal-light);padding:1px 5px;border-radius:8px;min-width:32px;text-align:center;flex-shrink:0;}
+.inl-sel{flex:1;border:none;border-bottom:1.5px solid var(--border);padding:2px 4px;font-family:'Cairo',Arial,sans-serif;font-size:11px;background:transparent;outline:none;direction:rtl;color:var(--text);}
+.agrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.af{display:flex;flex-direction:column;gap:4px;}
+.af label{font-size:11px;font-weight:700;color:var(--navy);}
+.ai{border:1.5px solid var(--border);border-radius:5px;padding:7px 9px;font-family:'Cairo',Arial,sans-serif;font-size:12px;color:var(--text);background:white;outline:none;text-align:right;width:100%;}
+.ai:focus{border-color:var(--teal);}
+.crow{display:flex;gap:5px;align-items:center;}
+.csw{width:32px;height:32px;border:1.5px solid var(--border);border-radius:5px;cursor:pointer;flex-shrink:0;padding:0;}
+.ctx{flex:1;border:1.5px solid var(--border);border-radius:5px;padding:7px 9px;font-family:'Cairo',Arial,sans-serif;font-size:12px;outline:none;text-align:right;background:white;color:var(--text);}
+.ctx:focus{border-color:var(--teal);}
+.stab{width:100%;border-collapse:collapse;border:1.5px solid var(--border);border-radius:6px;overflow:hidden;}
+.stab thead{background:var(--navy);color:white;}
+.stab th{padding:8px 9px;font-size:11px;font-weight:700;text-align:center;border-left:1px solid rgba(255,255,255,0.15);}
+.stab th:last-child{border-left:none;}
+.stab td{padding:6px 7px;border-bottom:1px solid var(--border);border-left:1px solid var(--border);text-align:center;}
+.stab td:last-child{border-left:none;}
+.stab tr:last-child td{border-bottom:none;}
+.stab tbody tr:nth-child(odd){background:var(--teal-light);}
+.stab tbody tr:nth-child(even){background:white;}
+.rl{text-align:right!important;font-weight:700;font-size:12px;color:var(--navy);padding-right:12px!important;}
+.stab td .il{width:100%;}
+.ngrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.nb{display:flex;flex-direction:column;gap:4px;}
+.nb label{font-size:11px;font-weight:700;color:var(--navy);}
+.na{border:1.5px solid var(--border);border-radius:5px;padding:8px 10px;font-family:'Cairo',Arial,sans-serif;font-size:12px;color:var(--text);resize:vertical;min-height:65px;outline:none;background:white;text-align:right;line-height:1.6;width:100%;}
+.na:focus{border-color:var(--teal);}
+.res-sec{display:flex;align-items:center;gap:11px;background:var(--teal-light);border:1.5px solid var(--teal-mid);border-radius:7px;padding:11px 15px;flex-wrap:wrap;}
+.res-label{font-size:13px;font-weight:700;color:var(--navy);}
+.res-opts{display:flex;gap:9px;flex-wrap:wrap;}
+.rbtn{display:flex;align-items:center;gap:5px;cursor:pointer;padding:5px 13px;border-radius:18px;border:2px solid var(--border);background:white;font-family:'Cairo',Arial,sans-serif;font-size:12px;font-weight:600;color:var(--text);transition:all .2s;}
+.rbtn:hover{border-color:var(--teal);color:var(--teal);}
+.rbtn.ap{background:#2a8f80;border-color:#2a8f80;color:white;}
+.rbtn.af2{background:#c0392b;border-color:#c0392b;color:white;}
+.rbtn.ar{background:#c97a3a;border-color:#c97a3a;color:white;}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block;}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--border);border-radius:6px;overflow:hidden;}
+.sc{padding:11px 13px;border-left:1px solid var(--border);}
+.sc:last-child{border-left:none;}
+.sc label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px;}
+.sn{border:none;border-bottom:1.5px solid var(--border);padding:3px 4px;font-family:'Cairo',Arial,sans-serif;font-size:13px;font-weight:600;color:var(--navy);background:transparent;outline:none;width:100%;text-align:right;}
+.sl{margin-top:16px;border-top:1px dashed var(--border);text-align:center;font-size:10px;color:var(--muted);padding-top:3px;}
+.f-footer{background:var(--navy);color:rgba(255,255,255,0.4);padding:7px 18px;display:flex;justify-content:space-between;font-size:10px;border-radius:0 0 8px 8px;}
+.f-footer span{color:white;font-weight:700;font-size:11px;}
+
+/* DAILY TABLE OVERLAY */
+.daily-overlay{position:fixed;inset:0;background:white;z-index:600;direction:rtl;display:none;flex-direction:column;}
+.daily-toolbar{background:var(--navy);padding:10px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;}
+.daily-toolbar h2{color:white;font-size:15px;font-weight:900;margin-left:auto;}
+.daily-toolbar label{color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;}
+.daily-toolbar input[type="date"]{padding:6px 10px;border-radius:5px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:white;font-family:'Cairo',Arial,sans-serif;font-size:12px;outline:none;direction:ltr;}
+.daily-content{flex:1;overflow:auto;padding:16px 20px;}
+.daily-table{width:100%;border-collapse:collapse;font-size:11px;}
+.daily-table th{background:var(--navy);color:white;padding:7px 8px;text-align:center;border:1px solid rgba(255,255,255,0.2);white-space:nowrap;font-size:11px;}
+.daily-table td{padding:6px 7px;border:1px solid var(--border);text-align:center;vertical-align:middle;}
+.daily-table tbody tr:nth-child(odd){background:var(--teal-light);}
+.daily-table tbody tr:nth-child(even){background:white;}
+.daily-table .td-name{text-align:right;font-weight:700;color:var(--navy);min-width:100px;}
+.daily-table .td-notes{text-align:right;font-size:10px;color:var(--muted);max-width:120px;}
+.daily-header{text-align:center;margin-bottom:12px;direction:rtl;}
+.daily-header h2{font-size:18px;font-weight:900;color:var(--navy);}
+.daily-header p{font-size:11px;color:var(--muted);margin-top:3px;}
+.daily-summary{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
+.sum-card{background:var(--teal-light);border:1.5px solid var(--teal-mid);border-radius:7px;padding:8px 16px;text-align:center;min-width:80px;}
+.sum-card .sum-num{font-size:22px;font-weight:900;color:var(--navy);}
+.sum-card .sum-lbl{font-size:10px;color:var(--muted);font-weight:600;}
+.rp{color:#2a8f80;font-weight:700;} .rf{color:#c0392b;font-weight:700;} .rr{color:#c97a3a;font-weight:700;}
+@media print{
+  .daily-overlay.printing{position:absolute!important;display:flex!important;z-index:auto;}
+  .daily-toolbar{display:none!important;}
+  .daily-content{overflow:visible!important;}
+  .daily-table{font-size:9px;}
+  .daily-table th,.daily-table td{padding:4px 5px;}
+  @page{margin:8mm;size:A4 landscape;}
+}
+/* DELETE MODAL */
+.del-modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;direction:rtl;}
+.del-box{background:white;border-radius:10px;padding:24px 28px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);}
+.del-box .del-ico{font-size:36px;margin-bottom:10px;}
+.del-box h3{font-size:15px;color:#1b3a52;margin-bottom:6px;font-weight:900;}
+.del-box p{font-size:12px;color:#5e7b88;margin-bottom:18px;line-height:1.6;}
+.del-box .del-name{font-weight:700;color:#c0392b;}
+.del-btns{display:flex;gap:10px;justify-content:center;}
+.del-btns button{padding:9px 22px;border:none;border-radius:6px;font-family:'Cairo',Arial,sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+.del-cancel{background:#f0f5f5;color:#1b3a52;}
+.del-cancel:hover{background:#e0e8e8;}
+.del-confirm{background:#c0392b;color:white;}
+.del-confirm:hover{background:#a93226;}
+/* TOAST */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2a8f80;color:white;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:700;display:none;z-index:2000;transition:opacity .4s;font-family:'Cairo',Arial,sans-serif;direction:rtl;white-space:nowrap;}
+@media print{
+  .app{display:block;}
+  .sidebar,.toolbar,.del-modal,#toast{display:none!important;}
+  .main-area{display:block;overflow:visible;height:auto;}
+  .form-area{padding:0;overflow:visible;height:auto;}
+  #rec-form{display:block!important;}
+  #no-sel{display:none!important;}
+  @page{margin:10mm;size:A4 portrait;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-header">
+      <div class="sb-title">🧪 سجلات المعمل <span class="sb-count" id="total-count">0</span></div>
+      <button class="new-btn" onclick="newRecord()">＋ عينة جديدة</button>
+    </div>
+    <div class="sb-search">
+      <input type="text" class="s-inp" id="search-inp" placeholder="🔍 بحث باسم العينة..." oninput="renderSidebar()">
+      <input type="date" class="s-inp" id="date-filter" onchange="renderSidebar()">
+      <select class="s-inp" id="result-filter" onchange="renderSidebar()" style="cursor:pointer;">
+        <option value="">كل النتائج</option>
+        <option value="pass">✅ مطابق</option>
+        <option value="fail">❌ غير مطابق</option>
+        <option value="recheck">⚠️ إعادة فحص</option>
+        <option value="none">⬜ جاري</option>
+      </select>
+    </div>
+    <div class="records-list" id="records-list"></div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-area">
+    <div class="toolbar">
+      <button class="btn bt" onclick="newRecord()">＋ جديدة</button>
+      <button class="btn bn2" onclick="printRecord()">🖨️ طباعة</button>
+      <button class="btn bo" onclick="exportExcel()">📊 Excel</button>
+      <button class="btn bo" onclick="showDailyTable()" style="background:#f0f5f5;color:#1b3a52;border-color:#9fc4c0;">📋 جدول يومي</button>
+      <button class="btn bo" onclick="exportJSON()" style="background:#fff8f0;color:#c97a3a;border-color:#f0c898;">💾 احتياطي</button>
+      <label class="btn bo" style="background:#f0fff8;color:#2a8f80;border-color:#9fc4c0;cursor:pointer;">
+        📂 استعادة<input type="file" accept=".json" onchange="importJSON(event)" style="display:none;">
+      </label>
+      <button class="btn bd" onclick="deleteRecord()">🗑️ حذف</button>
+      <span class="save-status" id="save-status">اختاري عينة أو أضيفي جديدة</span>
+    </div>
+
+    <div class="form-area" id="form-area">
+      <div class="no-sel" id="no-sel">
+        <div class="ico">🧪</div>
+        <h3>لا توجد عينة محددة</h3>
+        <p>اختاري من القايمة أو اضغطي "عينة جديدة"</p>
+      </div>
+
+      <div id="rec-form" style="display:none;">
+        <!-- HEADER -->
+        <div class="f-header">
+          <div class="f-logo">🧪</div>
+          <div class="f-title">
+            <h1>سجل اختبارات المعمل</h1>
+            <div class="sub">Quality Control Laboratory Record</div>
+          </div>
+          <div class="f-docno"><span>رقم النموذج</span><strong>QC-LR-001</strong><span>إصدار: 01</span></div>
+        </div>
+
+        <!-- ID STRIP -->
+        <div class="id-strip">
+          <div class="idf"><label>التاريخ</label><input type="date" class="iv" data-field="date"></div>
+          <div class="idf"><label>كود العينة</label><input type="text" class="iv" data-field="sample-code" placeholder="SG-2024-045"></div>
+          <div class="idf"><label>اسم العينة</label><input type="text" class="iv" data-field="sample-name" placeholder="اسم المنتج"></div>
+          <div class="idf"><label>رقم التشغيلة</label><input type="text" class="iv" data-field="batch-no" placeholder="Batch No." style="direction:ltr;"></div>
+        </div>
+
+        <div class="f-body">
+          <div class="f-secs">
+
+            <!-- MEASUREMENTS -->
+            <div>
+              <div class="sec-title">القياسات الفيزيائية الأساسية</div>
+              <div class="mgrid">
+                <!-- pH -->
+                <div class="mc">
+                  <div class="mh"><div class="mi">⚗️</div><div><div class="mn">درجة الحموضة</div><div class="mu">pH</div></div></div>
+                  <div class="mr"><label>القراءة ١</label><input class="il" type="number" step="0.01" data-field="ph-1" placeholder="0.00"><span class="ub">pH</span></div>
+                  <div class="mr"><label>القراءة ٢</label><input class="il" type="number" step="0.01" data-field="ph-2" placeholder="0.00"><span class="ub">pH</span></div>
+                  <div class="mr"><label>المتوسط</label><input class="il" type="number" step="0.01" data-field="ph-avg" placeholder="0.00" style="border-color:#2a8f80;font-weight:700;"><span class="ub">pH</span></div>
+                  <div class="mr"><label>المعيار</label><input class="il" type="text" data-field="ph-spec" placeholder="x – x"><span class="ub">spec</span></div>
+                </div>
+                <!-- Viscosity -->
+                <div class="mc">
+                  <div class="mh"><div class="mi">🌀</div><div><div class="mn">اللزوجة</div><div class="mu">Viscosity</div></div></div>
+                  <div class="mr"><label>القراءة ١</label><input class="il" type="number" data-field="visc-1" placeholder="0"><span class="ub">cP</span></div>
+                  <div class="mr"><label>القراءة ٢</label><input class="il" type="number" data-field="visc-2" placeholder="0"><span class="ub">cP</span></div>
+                  <div class="mr"><label>المتوسط</label><input class="il" type="number" data-field="visc-avg" placeholder="0" style="border-color:#2a8f80;font-weight:700;"><span class="ub">cP</span></div>
+                  <div class="mr"><label>Spindle/RPM</label><input class="il" type="text" data-field="visc-spindle" placeholder="SP/RPM"></div>
+                </div>
+                <!-- Centrifuge -->
+                <div class="mc">
+                  <div class="mh"><div class="mi">💫</div><div><div class="mn">الطرد المركزي</div><div class="mu">Centrifuge</div></div></div>
+                  <div class="mr"><label>السرعة</label><input class="il" type="number" data-field="centri-speed" placeholder="3000"><span class="ub">rpm</span></div>
+                  <div class="mr"><label>الوقت</label><input class="il" type="number" data-field="centri-time" placeholder="30"><span class="ub">دقيقة</span></div>
+                  <div class="mr" style="margin-top:5px;"><label>النتيجة</label><select class="inl-sel" data-field="centri-result"><option value="">اختر</option><option>مستقر ✅</option><option>فصل طبقات ⚠️</option><option>ترسيب ❌</option></select></div>
+                  <div class="mr"><label>ملاحظة</label><input class="il rtl-in" type="text" data-field="centri-note" placeholder="..."></div>
+                </div>
+                <!-- Density -->
+                <div class="mc">
+                  <div class="mh"><div class="mi">⚖️</div><div><div class="mn">الكثافة</div><div class="mu">Density</div></div></div>
+                  <div class="mr"><label>القراءة</label><input class="il" type="number" step="0.001" data-field="density-val" placeholder="1.000"><span class="ub">g/mL</span></div>
+                  <div class="mr"><label>الحرارة</label><input class="il" type="number" data-field="density-temp" placeholder="25"><span class="ub">°C</span></div>
+                  <div class="mr"><label>المعيار</label><input class="il" type="text" data-field="density-spec" placeholder="x.xxx – x.xxx"></div>
+                </div>
+                <!-- Foam -->
+                <div class="mc">
+                  <div class="mh"><div class="mi">🫧</div><div><div class="mn">اختبار الرغوة</div><div class="mu">Foam Test</div></div></div>
+                  <div class="mr"><label>أول</label><input class="il" type="number" data-field="foam-h1" placeholder="0"><span class="ub">mm</span></div>
+                  <div class="mr"><label>بعد 5 د</label><input class="il" type="number" data-field="foam-h2" placeholder="0"><span class="ub">mm</span></div>
+                  <div class="mr" style="margin-top:5px;"><label>الجودة</label><select class="inl-sel" data-field="foam-quality"><option value="">اختر</option><option>ناعمة كريمية</option><option>كثيفة</option><option>خفيفة</option><option>قليلة</option></select></div>
+                </div>
+                <!-- Conductivity -->
+                <div class="mc">
+                  <div class="mh"><div class="mi">⚡</div><div><div class="mn">الموصلية</div><div class="mu">Conductivity</div></div></div>
+                  <div class="mr"><label>الموصلية</label><input class="il" type="number" data-field="cond-val" placeholder="0.00"><span class="ub">mS/cm</span></div>
+                  <div class="mr"><label>TDS</label><input class="il" type="number" data-field="cond-tds" placeholder="0"><span class="ub">ppm</span></div>
+                  <div class="mr"><label>الحرارة</label><input class="il" type="number" data-field="cond-temp" placeholder="25"><span class="ub">°C</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- APPEARANCE -->
+            <div>
+              <div class="sec-title">الخصائص الحسية والمظهر</div>
+              <div class="agrid">
+                <div class="af"><label>👁️ المظهر العام</label><select class="ai" data-field="appear-general"><option value="">اختر</option><option>شفاف</option><option>معتم</option><option>كريمي</option><option>هلامي</option><option>لؤلؤي</option><option>متعكر</option></select></div>
+                <div class="af"><label>🎨 اللون</label><div class="crow"><input type="color" class="csw" data-field="appear-color-hex" value="#f5f0e8"><input type="text" class="ctx" data-field="appear-color-text" placeholder="وصف اللون..."></div></div>
+                <div class="af"><label>👃 الرائحة</label><select class="ai" data-field="appear-odor"><option value="">اختر</option><option>مطابقة للمعيار</option><option>خفيفة</option><option>قوية</option><option>غير مميزة</option><option>غير مقبولة</option></select></div>
+                <div class="af"><label>✋ القوام</label><select class="ai" data-field="appear-texture"><option value="">اختر</option><option>سائل رقيق</option><option>سائل متوسط</option><option>سائل كثيف</option><option>جل</option><option>كريم</option><option>مستحلب</option></select></div>
+              </div>
+            </div>
+
+            <!-- STABILITY -->
+            <div>
+              <div class="sec-title">اختبار الثبات الحراري</div>
+              <table class="stab">
+                <thead><tr><th style="width:100px;">الظرف</th><th>المظهر</th><th>pH</th><th>لزوجة (cP)</th><th>طرد مركزي</th><th>ملاحظات</th></tr></thead>
+                <tbody>
+                  <tr><td class="rl">25°C / 48h</td><td><input class="il" type="text" data-field="s-rm-ap" placeholder="—"></td><td><input class="il" type="number" step="0.01" data-field="s-rm-ph" placeholder="—"></td><td><input class="il" type="number" data-field="s-rm-vi" placeholder="—"></td><td><input class="il" type="text" data-field="s-rm-ce" placeholder="—"></td><td><input class="il rtl-in" type="text" data-field="s-rm-no" placeholder="—"></td></tr>
+                  <tr><td class="rl">45°C / 48h</td><td><input class="il" type="text" data-field="s-ht-ap" placeholder="—"></td><td><input class="il" type="number" step="0.01" data-field="s-ht-ph" placeholder="—"></td><td><input class="il" type="number" data-field="s-ht-vi" placeholder="—"></td><td><input class="il" type="text" data-field="s-ht-ce" placeholder="—"></td><td><input class="il rtl-in" type="text" data-field="s-ht-no" placeholder="—"></td></tr>
+                  <tr><td class="rl">4°C / 48h</td><td><input class="il" type="text" data-field="s-cl-ap" placeholder="—"></td><td><input class="il" type="number" step="0.01" data-field="s-cl-ph" placeholder="—"></td><td><input class="il" type="number" data-field="s-cl-vi" placeholder="—"></td><td><input class="il" type="text" data-field="s-cl-ce" placeholder="—"></td><td><input class="il rtl-in" type="text" data-field="s-cl-no" placeholder="—"></td></tr>
+                  <tr><td class="rl">Freeze/Thaw</td><td><input class="il" type="text" data-field="s-ft-ap" placeholder="—"></td><td><input class="il" type="number" step="0.01" data-field="s-ft-ph" placeholder="—"></td><td><input class="il" type="number" data-field="s-ft-vi" placeholder="—"></td><td><input class="il" type="text" data-field="s-ft-ce" placeholder="—"></td><td><input class="il rtl-in" type="text" data-field="s-ft-no" placeholder="—"></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- NOTES -->
+            <div>
+              <div class="sec-title">الملاحظات والتعديلات</div>
+              <div class="ngrid">
+                <div class="nb"><label>📝 الملاحظات العامة</label><textarea class="na" data-field="notes-gen" placeholder="أي ملاحظات أو مشكلات..."></textarea></div>
+                <div class="nb"><label>🔧 التعديلات المقترحة</label><textarea class="na" data-field="notes-mod" placeholder="التعديلات على الفورمولا..."></textarea></div>
+                <div class="nb"><label>🧴 المواد الخام</label><textarea class="na" data-field="notes-raw" placeholder="أسماء الخامات مع أرقام الدفعات..."></textarea></div>
+                <div class="nb"><label>📋 إجراءات إضافية</label><textarea class="na" data-field="notes-ext" placeholder="اختبارات أخرى..."></textarea></div>
+              </div>
+            </div>
+
+            <!-- RESULT -->
+            <div class="res-sec">
+              <div class="res-label">النتيجة النهائية:</div>
+              <div class="res-opts">
+                <button class="rbtn" id="pass-btn" onclick="setResult('pass')"><span class="dot"></span> مطابق ✅</button>
+                <button class="rbtn" id="fail-btn" onclick="setResult('fail')"><span class="dot"></span> غير مطابق ❌</button>
+                <button class="rbtn" id="rchk-btn" onclick="setResult('recheck')"><span class="dot"></span> إعادة فحص ⚠️</button>
+              </div>
+              <div style="margin-right:auto;display:flex;align-items:center;gap:5px;">
+                <label style="font-size:11px;color:var(--muted);font-weight:600;">حرارة الاختبار:</label>
+                <input type="number" data-field="test-temp" placeholder="25" style="width:42px;border:none;border-bottom:1.5px solid var(--border);background:transparent;outline:none;text-align:center;font-family:'Cairo',Arial;font-size:12px;direction:ltr;">
+                <span style="font-size:11px;color:var(--muted);">°C</span>
+              </div>
+            </div>
+
+            <!-- SIGNATURES -->
+            <div>
+              <div class="sec-title">الاعتماد والتوقيعات</div>
+              <div class="sgrid">
+                <div class="sc"><label>أجري الاختبار بواسطة</label><input type="text" class="sn" data-field="sig-an" placeholder="اسم المحلل"><div class="sl">التوقيع</div><input type="date" class="sn" data-field="sig-an-d" style="font-size:11px;margin-top:4px;direction:ltr;"></div>
+                <div class="sc"><label>مراجعة مشرف الجودة</label><input type="text" class="sn" data-field="sig-sv" placeholder="اسم المشرف"><div class="sl">التوقيع</div><input type="date" class="sn" data-field="sig-sv-d" style="font-size:11px;margin-top:4px;direction:ltr;"></div>
+                <div class="sc"><label>اعتماد مدير المعمل</label><input type="text" class="sn" data-field="sig-mg" placeholder="اسم المدير"><div class="sl">التوقيع</div><input type="date" class="sn" data-field="sig-mg-d" style="font-size:11px;margin-top:4px;direction:ltr;"></div>
+              </div>
+            </div>
+
+          </div>
+          <div class="f-footer">
+            <span>QC-LR-001 | إصدار 01</span>
+            <span>يُحفظ هذا السجل لمدة 3 سنوات وفق ISO 22716</span>
+            <span id="rec-id-disp">—</span>
+          </div>
+        </div>
+      </div><!-- rec-form -->
+    </div><!-- form-area -->
+  </div><!-- main-area -->
+</div><!-- app -->
+
+<!-- DAILY TABLE OVERLAY -->
+<div class="daily-overlay" id="daily-overlay">
+  <div class="daily-toolbar">
+    <h2>📋 الجدول اليومي</h2>
+    <label>من: <input type="date" id="dt-from"></label>
+    <label>إلى: <input type="date" id="dt-to"></label>
+    <button class="btn bt" onclick="renderDailyTable()">🔄 تحديث</button>
+    <button class="btn bn2" onclick="printDailyTable()">🖨️ طباعة</button>
+    <button class="btn bo" onclick="hideDailyTable()">✕ إغلاق</button>
+  </div>
+  <div class="daily-content" id="daily-content">
+    <div class="daily-header">
+      <h2>سجل الاختبارات اليومي — معمل مراقبة الجودة</h2>
+      <p id="daily-date-range"></p>
+    </div>
+    <div class="daily-summary" id="daily-summary"></div>
+    <table class="daily-table" id="daily-table-el">
+      <thead>
+        <tr>
+          <th>#</th><th>التاريخ</th><th>كود العينة</th><th>اسم العينة</th>
+          <th>رقم التشغيلة</th><th>pH</th><th>لزوجة (cP)</th>
+          <th>الطرد المركزي</th><th>الكثافة (g/mL)</th>
+          <th>الرغوة</th><th>المظهر</th><th>اللون</th><th>الرائحة</th>
+          <th>النتيجة</th><th>ملاحظات</th>
+        </tr>
+      </thead>
+      <tbody id="daily-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="del-modal" id="del-modal" onclick="if(event.target===this)hideDeleteConfirm()">
+  <div class="del-box">
+    <div class="del-ico">🗑️</div>
+    <h3>حذف السجل</h3>
+    <p>هتحذفي سجل <span class="del-name" id="del-name"></span><br>مش هترجع تاني!</p>
+    <div class="del-btns">
+      <button class="del-cancel" onclick="hideDeleteConfirm()">إلغاء</button>
+      <button class="del-confirm" onclick="confirmDelete()">حذف</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const SK = 'qc_lab_v2';
+let records = [], currentId = null, currentResult = null, saveTO = null;
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadAll();
+  renderSidebar();
+  setupAutoSave();
+  if (records.length > 0) loadRecord(records[0].id);
+});
+
+function loadAll() {
+  try { const r = localStorage.getItem(SK); records = r ? JSON.parse(r) : []; }
+  catch(e) { records = []; }
+}
+
+function saveAll() { localStorage.setItem(SK, JSON.stringify(records)); }
+
+function renderSidebar() {
+  const srch = (document.getElementById('search-inp').value || '').toLowerCase();
+  const df = document.getElementById('date-filter').value;
+  const list = document.getElementById('records-list');
+  document.getElementById('total-count').textContent = records.length;
+
+  const rf = document.getElementById('result-filter').value;
+  let filtered = records.filter(r => {
+    const nm = (r.sampleName || '').toLowerCase();
+    const cd = (r.sampleCode || '').toLowerCase();
+    const matchResult = !rf || (rf==='none' ? !r.result : r.result===rf);
+    return (!srch || nm.includes(srch) || cd.includes(srch)) && (!df || r.date===df) && matchResult;
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="ico">📋</div>${records.length===0?'لا توجد سجلات بعد<br>اضغطي "عينة جديدة"':'لا توجد نتائج'}</div>`;
+    return;
+  }
+
+  const rm = { pass:'<span class="badge bp">مطابق</span>', fail:'<span class="badge bf">غير مطابق</span>', recheck:'<span class="badge br">إعادة فحص</span>' };
+  list.innerHTML = filtered.map(r => `
+    <div class="rec-item ${r.id===currentId?'active':''}" onclick="loadRecord('${r.id}')">
+      <div class="rec-name">${r.sampleName||'عينة بدون اسم'}</div>
+      <div class="rec-meta"><span>${r.date||'—'}</span>${rm[r.result]||'<span class="badge bn">جاري</span>'}</div>
+      ${r.sampleCode?`<div class="rec-code">${r.sampleCode}</div>`:''}
+    </div>`).join('');
+}
+
+function newRecord() {
+  const today = new Date().toISOString().split('T')[0];
+  const id = Date.now().toString();
+  records.unshift({ id, sampleName:'', sampleCode:'', date:today, result:null, fields:{ date:today } });
+  saveAll();
+  loadRecord(id);
+  renderSidebar();
+}
+
+function loadRecord(id) {
+  currentId = id;
+  const rec = records.find(r => r.id === id);
+  if (!rec) return;
+  document.getElementById('no-sel').style.display = 'none';
+  document.getElementById('rec-form').style.display = 'block';
+  document.querySelectorAll('[data-field]').forEach(el => {
+    const v = rec.fields?.[el.dataset.field];
+    el.value = v !== undefined ? v : '';
+  });
+  currentResult = rec.result || null;
+  ['pass-btn','fail-btn','rchk-btn'].forEach(b => document.getElementById(b).className = 'rbtn');
+  if (currentResult==='pass') document.getElementById('pass-btn').className='rbtn ap';
+  if (currentResult==='fail') document.getElementById('fail-btn').className='rbtn af2';
+  if (currentResult==='recheck') document.getElementById('rchk-btn').className='rbtn ar';
+  document.getElementById('rec-id-disp').textContent = 'ID: ' + id.slice(-6);
+  setSS('محمل ✓','#2a8f80');
+  renderSidebar();
+}
+
+function saveCurrent() {
+  if (!currentId) return;
+  const rec = records.find(r => r.id === currentId);
+  if (!rec) return;
+  rec.fields = rec.fields || {};
+  document.querySelectorAll('[data-field]').forEach(el => { rec.fields[el.dataset.field] = el.value; });
+  rec.result = currentResult;
+  rec.sampleName = rec.fields['sample-name'] || 'عينة بدون اسم';
+  rec.sampleCode = rec.fields['sample-code'] || '';
+  rec.date = rec.fields['date'] || '';
+  saveAll();
+  renderSidebar();
+  const t = new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+  setSS('✅ تم الحفظ '+t,'#2a8f80');
+  setTimeout(() => setSS('الحفظ التلقائي مفعّل','')  , 3000);
+}
+
+function setSS(txt, clr) {
+  const el = document.getElementById('save-status');
+  el.textContent = txt; el.style.color = clr || '#5e7b88';
+}
+
+function setupAutoSave() {
+  document.getElementById('rec-form').addEventListener('input', () => { clearTimeout(saveTO); saveTO = setTimeout(saveCurrent, 800); });
+  document.getElementById('rec-form').addEventListener('change', () => { clearTimeout(saveTO); saveTO = setTimeout(saveCurrent, 800); });
+}
+
+function setResult(type) {
+  if (!currentId) return;
+  currentResult = type;
+  ['pass-btn','fail-btn','rchk-btn'].forEach(b => document.getElementById(b).className='rbtn');
+  if (type==='pass') document.getElementById('pass-btn').className='rbtn ap';
+  if (type==='fail') document.getElementById('fail-btn').className='rbtn af2';
+  if (type==='recheck') document.getElementById('rchk-btn').className='rbtn ar';
+  saveCurrent();
+}
+
+function deleteRecord() {
+  if (!currentId) { showToast('اختاري سجل الأول من القايمة', '#c97a3a'); return; }
+  const rec = records.find(r => r.id === currentId);
+  showDeleteConfirm(rec?.sampleName || 'هذه العينة');
+}
+
+function confirmDelete() {
+  hideDeleteConfirm();
+  records = records.filter(r => r.id !== currentId);
+  saveAll(); currentId = null; currentResult = null;
+  document.getElementById('no-sel').style.display = 'flex';
+  document.getElementById('rec-form').style.display = 'none';
+  if (records.length > 0) loadRecord(records[0].id);
+  renderSidebar();
+  showToast('تم الحذف', '#c0392b');
+}
+
+function showDeleteConfirm(name) {
+  document.getElementById('del-name').textContent = name;
+  document.getElementById('del-modal').style.display = 'flex';
+}
+
+function hideDeleteConfirm() {
+  document.getElementById('del-modal').style.display = 'none';
+}
+
+function printRecord() {
+  if (!currentId) { showToast('اختاري سجل الأول من القايمة', '#c97a3a'); return; }
+  // force save before print
+  saveCurrent();
+  setTimeout(() => window.print(), 300);
+}
+
+// ===== RESULT FILTER in renderSidebar =====
+// (integrated below by updating renderSidebar)
+
+// ===== DAILY TABLE =====
+function showDailyTable() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('dt-from').value = today;
+  document.getElementById('dt-to').value = today;
+  document.getElementById('daily-overlay').style.display = 'flex';
+  renderDailyTable();
+}
+
+function hideDailyTable() {
+  const ov = document.getElementById('daily-overlay');
+  ov.style.display = 'none';
+  ov.classList.remove('printing');
+}
+
+function renderDailyTable() {
+  const from = document.getElementById('dt-from').value;
+  const to   = document.getElementById('dt-to').value;
+  const rm   = {pass:'مطابق',fail:'غير مطابق',recheck:'إعادة فحص'};
+  const rc   = {pass:'rp',fail:'rf',recheck:'rr'};
+
+  let filtered = records;
+  if (from) filtered = filtered.filter(r => r.date >= from);
+  if (to)   filtered = filtered.filter(r => r.date <= to);
+
+  // summary
+  const total = filtered.length;
+  const pass  = filtered.filter(r => r.result==='pass').length;
+  const fail  = filtered.filter(r => r.result==='fail').length;
+  const rchk  = filtered.filter(r => r.result==='recheck').length;
+  document.getElementById('daily-summary').innerHTML = `
+    <div class="sum-card"><div class="sum-num">${total}</div><div class="sum-lbl">إجمالي العينات</div></div>
+    <div class="sum-card" style="border-color:#2a8f80;"><div class="sum-num rp">${pass}</div><div class="sum-lbl">مطابق</div></div>
+    <div class="sum-card" style="border-color:#c0392b;"><div class="sum-num rf">${fail}</div><div class="sum-lbl">غير مطابق</div></div>
+    <div class="sum-card" style="border-color:#c97a3a;"><div class="sum-num rr">${rchk}</div><div class="sum-lbl">إعادة فحص</div></div>
+    <div class="sum-card"><div class="sum-num" style="color:#5e7b88;">${total-pass-fail-rchk}</div><div class="sum-lbl">جاري</div></div>
+  `;
+
+  // date range label
+  document.getElementById('daily-date-range').textContent =
+    from===to ? `تاريخ: ${from||'كل السجلات'}` : `من ${from} إلى ${to}`;
+
+  // table rows
+  const tbody = document.getElementById('daily-tbody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="15" style="padding:20px;color:#5e7b88;">لا توجد سجلات في هذه الفترة</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map((r,i) => {
+    const f = r.fields || {};
+    const res = rm[r.result] || '—';
+    const cls = rc[r.result] || '';
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${f['date']||'—'}</td>
+      <td style="direction:ltr;font-size:10px;">${f['sample-code']||'—'}</td>
+      <td class="td-name">${f['sample-name']||'—'}</td>
+      <td style="font-size:10px;">${f['batch-no']||'—'}</td>
+      <td><strong>${f['ph-avg']||'—'}</strong></td>
+      <td>${f['visc-avg']||'—'}</td>
+      <td style="font-size:10px;">${f['centri-result']||'—'}</td>
+      <td>${f['density-val']||'—'}</td>
+      <td>${f['foam-quality']||'—'}</td>
+      <td>${f['appear-general']||'—'}</td>
+      <td style="font-size:10px;">${f['appear-color-text']||'—'}</td>
+      <td style="font-size:10px;">${f['appear-odor']||'—'}</td>
+      <td class="${cls}" style="font-weight:700;white-space:nowrap;">${res}</td>
+      <td class="td-notes">${(f['notes-gen']||'').substring(0,40)||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function printDailyTable() {
+  renderDailyTable();
+  const ov = document.getElementById('daily-overlay');
+  ov.classList.add('printing');
+  window.print();
+  setTimeout(() => ov.classList.remove('printing'), 1000);
+}
+
+// ===== JSON BACKUP =====
+function exportJSON() {
+  const data = { exportDate: new Date().toISOString(), records };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `نسخة_احتياطية_معمل_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  showToast('✅ تم تحميل النسخة الاحتياطية', '#2a8f80');
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const imported = data.records || data;
+      if (!Array.isArray(imported)) throw new Error('ملف غير صحيح');
+      const existing = records.length;
+      // merge: add records that don't already exist by ID
+      const existingIds = new Set(records.map(r => r.id));
+      const newRecs = imported.filter(r => !existingIds.has(r.id));
+      records = [...newRecs, ...records];
+      saveAll();
+      renderSidebar();
+      showToast(`✅ تم استيراد ${newRecs.length} سجل جديد`, '#2a8f80');
+    } catch(err) {
+      showToast('❌ ملف غير صحيح', '#c0392b');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function showToast(msg, color) {
+  let t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color || '#2a8f80';
+  t.style.display = 'block';
+  t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.style.display='none', 400); }, 2500);
+}
+
+function exportExcel() {
+  if (typeof XLSX === 'undefined') { alert('انتظري لحظة ثم حاولي تاني'); return; }
+  const hdrs = ['التاريخ','كود العينة','اسم العينة','رقم التشغيلة','pH-1','pH-2','pH متوسط','pH معيار','لزوجة-1','لزوجة-2','لزوجة متوسط','Spindle/RPM','طرد-سرعة','طرد-وقت','طرد-نتيجة','كثافة','كثافة-حرارة','رغوة-أول','رغوة-5د','جودة رغوة','موصلية','TDS','مظهر','لون','رائحة','قوام','25°C-مظهر','25°C-pH','25°C-لزوجة','45°C-مظهر','45°C-pH','45°C-لزوجة','4°C-مظهر','4°C-pH','4°C-لزوجة','FT-مظهر','FT-pH','النتيجة','ملاحظات','تعديلات','مواد خام','المحلل','المشرف','المدير'];
+  const rm = {pass:'مطابق ✅',fail:'غير مطابق ❌',recheck:'إعادة فحص ⚠️'};
+  const rows = records.map(r => {
+    const f = r.fields||{};
+    return [f['date'],f['sample-code'],f['sample-name'],f['batch-no'],f['ph-1'],f['ph-2'],f['ph-avg'],f['ph-spec'],f['visc-1'],f['visc-2'],f['visc-avg'],f['visc-spindle'],f['centri-speed'],f['centri-time'],f['centri-result'],f['density-val'],f['density-temp'],f['foam-h1'],f['foam-h2'],f['foam-quality'],f['cond-val'],f['cond-tds'],f['appear-general'],f['appear-color-text'],f['appear-odor'],f['appear-texture'],f['s-rm-ap'],f['s-rm-ph'],f['s-rm-vi'],f['s-ht-ap'],f['s-ht-ph'],f['s-ht-vi'],f['s-cl-ap'],f['s-cl-ph'],f['s-cl-vi'],f['s-ft-ap'],f['s-ft-ph'],rm[r.result]||'—',f['notes-gen'],f['notes-mod'],f['notes-raw'],f['sig-an'],f['sig-sv'],f['sig-mg']].map(v=>v||'');
+  });
+  const ws = XLSX.utils.aoa_to_sheet([hdrs,...rows]);
+  ws['!cols'] = hdrs.map(h => ({wch:Math.max(h.length+3,12)}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'سجلات المعمل');
+  XLSX.writeFile(wb,`سجلات_المعمل_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+</script>
+</body>
+</html>
